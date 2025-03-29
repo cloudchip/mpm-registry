@@ -1,0 +1,40 @@
+name: Add Library
+description: Submit a new library for inclusion in the MPM registry.
+title: "Add library: [library-name]"
+labels: ["library-request"]
+body:
+  - type: input
+    id: library_name
+    attributes:
+      label: Library Name
+      description: The name of your library.
+      placeholder: "Example: MPU6050 Driver"
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release tag or version of the library.
+      placeholder: "Example: 1.0.0"
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Repository URL
+      description: The URL of the library repository.
+      placeholder: "Example: https://github.com/username/repo-name"
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of your library.
+      placeholder: "Example: A driver for the MPU6050 sensor."
+      required: true
+  - type: input
+    id: platforms
+    attributes:
+      label: Supported Platforms
+      description: Platforms your library supports (comma-separated).
+      placeholder: "Example: esp32, arduino"
+      required: true

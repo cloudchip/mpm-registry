@@ -1,0 +1,44 @@
+name: Process Library Requests
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  update-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Extract issue details
+        id: extract
+        uses: actions-ecosystem/action-regex-match@v1
+        with:
+          text: ${{ github.event.issue.body }}
+          regex: 'Library Name: (?<name>.*)\nVersion: (?<version>.*)\nRepository: (?<repo>.*)\nDescription: (?<desc>.*)\nSupported Platforms: (?<platforms>.*)'
+
+      - name: Update registry.json
+        run: |
+          LIB_NAME="${{ steps.extract.outputs.name }}"
+          VERSION="${{ steps.extract.outputs.version }}"
+          REPO="${{ steps.extract.outputs.repo }}"
+          DESC="${{ steps.extract.outputs.desc }}"
+          PLATFORMS="${{ steps.extract.outputs.platforms }}"
+          
+          # Update registry.json
+          if [[ -f registry.json ]]; then
+            jq ".libraries[\"$LIB_NAME\"] = {\"name\": \"$LIB_NAME\", \"version\": \"$VERSION\", \"repository\": \"$REPO\", \"description\": \"$DESC\", \"platforms\": \"$PLATFORMS\"}" registry.json > registry.tmp.json
+            mv registry.tmp.json registry.json
+          else
+            echo "{\"libraries\": {\"$LIB_NAME\": {\"name\": \"$LIB_NAME\", \"version\": \"$VERSION\", \"repository\": \"$REPO\", \"description\": \"$DESC\", \"platforms\": \"$PLATFORMS\"}}}" > registry.json
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add registry.json
+          git commit -m "Add library ${{ steps.extract.outputs.name }} to registry"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
